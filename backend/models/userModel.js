@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose'
+const mongoose = require('mongoose')
 
-const userSchema = Schema({
+const userSchema = mongoose.Schema({
     name : {
         type : String,
         required : [true, ' Please add a name ']
@@ -14,15 +14,12 @@ const userSchema = Schema({
         type : String,
         required : [true, 'Please add a password']
     },
-    role : {
-        type : String,
-    },
     attributes : {
-        type : Array
+        type : [String]
     }
 },
 {
     timestamps : true
 })
 
-export default model('User', userSchema)
+module.exports = mongoose.model('User',userSchema)
