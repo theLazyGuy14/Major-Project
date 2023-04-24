@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express') 
 const router = express.Router()
 const {
      getNotes,
@@ -6,8 +6,9 @@ const {
      deleteNote
 } = require('../controllers/noteController')
 
-router.route('/').get(getNotes).post(setNote)
+const { ownerProtect } = require('../middleware/authMiddleware')
 
-router.delete('/:id', deleteNote)
+router.route('/').get(ownerProtect, getNotes).post(ownerProtect, setNote)
+router.route('/:id').delete(ownerProtect, deleteNote)
 
 module.exports = router 
