@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+* {
+  margin : 0;
+  padding : 0;
+  box-sizing: border-box;  
+}
+
+body {
+  background : linear-gradient(to top, rgba(0,0,0,0.5)50%, rgba(0,0,0,0.5)50%), url('../public/OrgBG.jpg');
+  background-position : center;
+  background-size : cover;
+  height : 100vh;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;  
+  color : #F0F0F0;
+}
+
+h1, h3 {
+  font-weight : 600;
+  margin-bottom : 10px;
+}
+
+h2 {
+  font-weight: 900;
+  font-size: 25px;
+  margin-bottom: 20px;
+  padding: 33px 50px 0 60px;
+  text-align: center;
+}
+
+p {
+  line-height : 1.5;
+}
+
+a {
+  text-decoration: none;
+  color : #000;
+}
+
+ul {
+  list-style : none;
+}
+
+li {
+  line-height : 2.2;
+}
+
+input {
+  width: 100%;
+  padding: 10px 15px 10px;
+  border: 1px solid transparent;
+  outline: none;
+  font-size: 15px;
+  box-sizing: border-box;
+  font-weight : 700;
+}
+
+input:focus {
+  border : 1.5px solid black;
+  background : #C9A7EB;  
+}
+
+.page-content {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-content {
+  background: rgba(211, 211, 211, 0.4);
+  width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
+  margin: 0;
+  position: relative;
+}
+
+.form-detail {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.form-row {
+  position: relative;
+  margin-bottom: 24px;
+  padding-left: 60px;
+  padding-right: 50px;
+}
+
+.form-row input {
+  border-radius: 20px;  
+}
+
+.form-last {
+  padding-left: 60px;
+  margin: 44px 0 10px;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;  
+}
+
+.header {
+  display : flex;
+  justify-content: space-between;
+  align-items: center;
+  padding : 20px 0;
+  border-bottom : 1px solid #e6e6e6;
+  margin-bottom : 60px;
+}
+
+.logo {
+  color : #A683E3;
+  font-size : 21px;  
+  float : left;
+}
+
+.header ul {
+  display : flex;
+  align-items: center;  
+  justify-content: space-between;
+}
+
+.header ul li {
+  margin-left : 20px;  
+}
+
+.header ul li a {
+  display : flex;
+  align-items : center;
+}
+
+.header ul li a:hover {
+  color: #777;
+}
+
+.header ul li a svg {
+  margin-right: 5px;
+}
+
+.btnn {
+  background : #A683E3;
+  padding : 0 4px;
+  border : none;
+  border-radius : 5px;  
+  color : #fff;
+}
+
+.btnn:hover {    
+  background : black;
+}
+
+.signIn {
+  border-radius: 25px;  
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.btn {
+  padding : 10px 20px;
+  border : 1px solid #000;
+  background : #3B71CA;
+  color : #fff;
+  font-size : 16px;
+  font-weight : 700;
+  cursor : pointer;
+  margin-right : 50px;
+}
+.btn:hover {
+  background : #0B51C5;
+}
+
+.heading {
+  font-size : 1.4rem;
+  font-weight : 700;
+  margin-bottom : 50px;
+  padding : 0 20px;
+}
+
+.heading p {
+  margin-left : 30px;
+}
