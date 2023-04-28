@@ -4,7 +4,6 @@ const crypto = require('crypto')
 const jexl = require('jexl')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
-const UKey = require('../models/userKeyModel')
 
 // @desc    Register new user
 // @route   POST /api/users
@@ -104,15 +103,15 @@ const addAttributes = asyncHandler(async (req, res) => {
 
     updateAttributes.forEach( (attribute) => {
         tempAttr = [...tempAttr, attribute]
-    })  
+    })      
 
     User.updateOne({_id : person.id}, {attributes : tempAttr})
         .then( () => console.log(' Attributes added '))
         .catch( (err) => console.error(' Error adding attributes ', err))
     
     try {
-        const { publicKey, privateKey } = await crypto.generateKeyPairSync('ec', {
-            namedCurve : 'secp256k1',
+        const { publicKey, privateKey } = await crypto.generateKeyPairSync('rsa', {
+            modulusLength : 4096,
             publicKeyEncoding : {
                 type : 'spki',
                 format : 'pem'
@@ -123,37 +122,25 @@ const addAttributes = asyncHandler(async (req, res) => {
             }
         })
        
-        const updatedPublicKey = publicKey.replace(/-----BEGIN PUBLIC KEY-----\n/,'').replace(/-----END PUBLIC KEY-----\n/,'')
-        const updatedPrivateKey = privateKey.replace(/-----BEGIN PRIVATE KEY-----\n/,'').replace(/-----END PRIVATE KEY-----\n/,'')
+        // const updatedPublicKey = publicKey.replace(/-----BEGIN PUBLIC KEY-----\n/,'').replace(/-----END PUBLIC KEY-----\n/,'')
+        // const updatedPrivateKey = privateKey.replace(/-----BEGIN PRIVATE KEY-----\n/,'').replace(/-----END PRIVATE KEY-----\n/,'')
         
-        console.log(' Public key : \n',updatedPublicKey)
-        console.log('\n\n Private key : \n',updatedPrivateKey)  
+        // console.log(' Public key : \n',updatedPublicKey)
+        // console.log(' Private key : \n',updatedPrivateKey)
         
-        const userKeyExists = await UKey.findById(person.id)
-        let assignKey
-
-        if(userKeyExists) {
-            assignKey = await UKey.findByIdAndUpdate(person.id,{
-                publicKey : updatedPublicKey,
-                privateKey : updatedPrivateKey
-            })            
-        }
-        else {
-            assignKey = await UKey.create({
-                _id : person.id,
-                publicKey : updatedPublicKey,
-                privateKey : updatedPrivateKey
-            })
-        }        
+        assignKey = await User.findByIdAndUpdate(person.id, {
+            publicKey,
+            privateKey
+        })
 
         if(assignKey) {
-            res.status(201)
+            res.status(200)
         }
         else {
             res.status(401)
-            throw new Error(' Could not update keys ')
+            throw new Error(' Could not add keys ')
         }
-           
+              
         } catch (error) {
             res.status(400)
             throw new Error(' Could not add keys ')
@@ -165,35 +152,110 @@ const addAttributes = asyncHandler(async (req, res) => {
 // Generate JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-
+        expiresIn : '24h'
     })
 }
 
 // @desc    Access Policy
-// @route   POST /api/users/policy
+// @route   GET /api/users/policy
 // @access  Private
 const generateAccessPolicy = asyncHandler( async (req, res) => {
     const accessPolicy = "(CEO == true) || (CFO == true)"
-    const accessCondition = ['CEO','CFO']
+    const accessCondition = ['CEO','CFO']    
 
-    const tempUser = {}
-
-    for(let i = 0; i < accessCondition.length; i++) {
-        const attr = accessCondition[i]
-        tempUser[attr] = true
-    }
+    const authorizedUsers = await User.find({attributes : {$in : accessCondition}}).select(['_id','name','publicKey'])    
+    const secret = 'https://www.google.com/'
     
-    jexl.eval(accessPolicy, tempUser).then( (result) => {
-        if(result === true) {
-            console.log('user satisfies access policy')
+    const encryptedData = authorizedUsers.map( (user) => {
+        const publicKey = user.publicKey
+        const buffer = Buffer.from(secret)
+        const encrypted = crypto.publicEncrypt(publicKey, buffer)
+        
+        return { [user.name] : encrypted.toString('base64')}
+    }) 
+
+    console.log(encryptedData)
+
+    const allUsers = await User.find()    
+
+    for(let i = 0; i < allUsers.length; i++) {
+
+        const findUser = encryptedData.find( u => allUsers[i].name in u)
+        if(findUser) {
+            const user = await User.findOne({name : allUsers[i].name})
+            
+            const updateUser = await User.findByIdAndUpdate(user.id, {
+                secretKey : findUser[user.name]
+            })
+
+            if(!updateUser) {
+                throw new Error(' Could not update user ')
+            }
         }
         else {
-            console.log(' not accepting access condition ')
+            const key = crypto.randomBytes(512).toString('base64')
+            
+            const updateUser = await User.findByIdAndUpdate(allUsers[i]._id,{
+                secretKey : key
+            })
         }
-    })
+    }
+
+    // const test = crypto.randomBytes(512).toString('base64')
+    // console.log(test)
+
+
+
+    // const testUser = await User.findOne({attributes : 'CFO'})
+    // const pvtKey = testUser.privateKey
+
+    // const test = encryptedData.find( u => testUser.name in u)
+    // console.log(test[testUser.name])    
+
+    // const encrypted = Buffer.from(test[testUser.name], 'base64')
+    // const decrypted = crypto.privateDecrypt(pvtKey, encrypted)
+
+    // console.log(decrypted.toString())
+    
+    // jexl.eval(accessPolicy, tempUser).then( (result) => {
+    //     if(result === true) {
+    //         console.log('user satisfies access policy')
+    //     }
+    //     else {
+    //         console.log(' not accepting access condition ')
+    //     }
+    // })
 
     res.json({message : 'Access Policy generated'})
 
+})
+
+// @desc    Decrypt Data
+// @route   GET /api/users/decrypt
+// @access  Private
+const decryptUserData = asyncHandler( async (req, res) => {
+
+    const currentUser = await User.findById(req.user.id)
+    // console.log(currentUser)
+    // console.log(encryptedData)
+
+    // const testUser = await User.findOne({attributes : 'CFO'})
+    // const pvtKey = testUser.privateKey
+
+    // const test = encryptedData.find( u => testUser.name in u)
+    // console.log(test[testUser.name])
+
+    // const encrypted = Buffer.from(test[testUser.name], 'base64')
+    // const decrypted = crypto.privateDecrypt(pvtKey, encrypted)
+
+    // console.log(decrypted.toString())
+
+    const encrypted = Buffer.from(currentUser.secretKey, 'base64')
+    const decrypted = crypto.privateDecrypt(currentUser.privateKey, encrypted)
+
+    console.log(decrypted.toString())
+
+    res.json({message : 'This is a decrypt test'})
 })
 
 
@@ -202,5 +264,6 @@ module.exports = {
     loginUser,
     getMe,
     addAttributes,   
-    generateAccessPolicy 
+    generateAccessPolicy,
+    decryptUserData
 }
