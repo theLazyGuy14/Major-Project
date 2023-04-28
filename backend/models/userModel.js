@@ -16,7 +16,10 @@ const userSchema = mongoose.Schema({
     },
     attributes : {
         type : [String]
-    }
+    },
+    publicKey : String,
+    privateKey : String,
+    secretKey : String,
 },
 {
     timestamps : true
