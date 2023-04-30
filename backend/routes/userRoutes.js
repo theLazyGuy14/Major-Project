@@ -17,7 +17,7 @@ router.post('/', registerUser)
 router.post('/login', loginUser)
 router.get('/me', protect, getMe)
 router.post('/attributes',ownerProtect, addAttributes)
-router.get('/policy',ownerProtect, generateAccessPolicy)
+router.post('/policy',ownerProtect, generateAccessPolicy)
 router.get('/decrypt', protect, decryptUserData)
 
 module.exports = router

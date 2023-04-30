@@ -157,14 +157,20 @@ const generateToken = (id) => {
 }
 
 // @desc    Access Policy
-// @route   GET /api/users/policy
+// @route   POST /api/users/policy
 // @access  Private
 const generateAccessPolicy = asyncHandler( async (req, res) => {
-    const accessPolicy = "(CEO == true) || (CFO == true)"
-    const accessCondition = ['CEO','CFO']    
+    const {secret, attributes} = req.body
+
+    // accessCondition = attributes.split(' ')    
+    // const accessPolicy = "(CEO == true) || (CFO == true)"
+    const accessCondition = attributes.split(' ')   
+    
+    console.log(secret)
+    console.log(accessCondition)
 
     const authorizedUsers = await User.find({attributes : {$in : accessCondition}}).select(['_id','name','publicKey'])    
-    const secret = 'https://www.google.com/'
+    // const secret = 'https://www.google.com/'
     
     const encryptedData = authorizedUsers.map( (user) => {
         const publicKey = user.publicKey
@@ -174,7 +180,7 @@ const generateAccessPolicy = asyncHandler( async (req, res) => {
         return { [user.name] : encrypted.toString('base64')}
     }) 
 
-    console.log(encryptedData)
+    //console.log(encryptedData)
 
     const allUsers = await User.find()    
 
@@ -201,6 +207,8 @@ const generateAccessPolicy = asyncHandler( async (req, res) => {
         }
     }
 
+    res.json({message : 'Access Policy generated'})
+
     // const test = crypto.randomBytes(512).toString('base64')
     // console.log(test)
 
@@ -224,9 +232,7 @@ const generateAccessPolicy = asyncHandler( async (req, res) => {
     //     else {
     //         console.log(' not accepting access condition ')
     //     }
-    // })
-
-    res.json({message : 'Access Policy generated'})
+    // })   
 
 })
 
@@ -248,14 +254,18 @@ const decryptUserData = asyncHandler( async (req, res) => {
     // const encrypted = Buffer.from(test[testUser.name], 'base64')
     // const decrypted = crypto.privateDecrypt(pvtKey, encrypted)
 
-    // console.log(decrypted.toString())
+    // console.log(decrypted.toString())    
 
     const encrypted = Buffer.from(currentUser.secretKey, 'base64')
     const decrypted = crypto.privateDecrypt(currentUser.privateKey, encrypted)
 
-    console.log(decrypted.toString())
+    //console.log(decrypted.toString())
 
-    res.json({message : 'This is a decrypt test'})
+    const decData = decrypted.toString()
+    
+    res.status(200).json({
+        decData
+    })
 })
 
 
