@@ -113,7 +113,7 @@ function Register() {
                             />
                         </div>
                         <div className = 'form-last'>
-                            <button className = 'btn signIn'> Submit </button>
+                            <button type = 'submit' className = 'btn signIn'> Submit </button>
                         </div>
                     </div>
                 </form>
