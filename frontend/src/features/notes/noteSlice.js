@@ -39,6 +39,7 @@ export const addAttributes = createAsyncThunk('note/attributes', async (userData
 // Check for decryption
 export const decrypt = createAsyncThunk('note/decrypt', async (userData, thunkAPI) => {
     try {
+        console.log(userData)
         return await noteService.decrypt(userData)
     } catch (error) {
         const message = (error.response && error.response.data &&

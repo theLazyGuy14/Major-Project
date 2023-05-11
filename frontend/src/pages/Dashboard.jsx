@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import { decrypt, reset } from "../features/notes/noteSlice"
+import Spinner from "../components/Spinner"
+import { redirect } from "react-router-dom"
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -10,34 +12,43 @@ function Dashboard() {
 
   const {user, isLoading, isError, isSuccess, message} = useSelector( (state) => state.note)
 
-  useEffect(() => {     
-    if(user) {
-      if(JSON.stringify(user.email.split('@')[0]) === JSON.stringify("chairman")) {
-        navigate('/home')
-      }
-    } 
-    else {
-      navigate('/login')
-    }      
+  useEffect(() => { 
     if(isError) {
       toast.error(message)
     }
     if(isSuccess) {
-      toast.success(' Secret : '+message.toString())
-    }
+      console.log(message)
+      toast.success(' Secret : '+message.message)
+    }    
+    if(user) {
+      if(JSON.stringify(user.email.split('@')[0]) === JSON.stringify("chairman")) {
+        navigate('/home')
+      }
+      else {
+        navigate('/')
+      }
+    } 
+    if(!user) {
+      navigate('/login')
+    }      
+   
 
     dispatch(reset())
 
   },[user, isError, isSuccess, message, navigate, dispatch])   
 
   const onSubmit = (event) => {
-    event.preventDefault()
-
+    event.preventDefault()  
+    
     const userData = {
-      user
+      user,
     }
 
     dispatch(decrypt(userData))
+  }
+
+  if(isLoading) {
+    return <Spinner />
   }
 
   return (

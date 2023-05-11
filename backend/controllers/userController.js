@@ -257,14 +257,24 @@ const decryptUserData = asyncHandler( async (req, res) => {
     // console.log(decrypted.toString())    
 
     const encrypted = Buffer.from(currentUser.secretKey, 'base64')
-    const decrypted = crypto.privateDecrypt(currentUser.privateKey, encrypted)
+    try {
+        const decrypted = crypto.privateDecrypt(currentUser.privateKey, encrypted)
+        const decData = decrypted.toString()
+        console.log(decrypted)        
+        res.status(200).json({
+            message : decData
+        })
+    } catch (error) {
+        res.status(400)
+        throw new Error(' Not authorized ')
+    }
+    
 
     //console.log(decrypted.toString())
-
-    const decData = decrypted.toString()
+    console.log(decrypted)    
     
     res.status(200).json({
-        decData
+        message : decData
     })
 })
 
